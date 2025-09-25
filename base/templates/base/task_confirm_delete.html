@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html class="h-full bg-gray-100">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Delete Task</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-xl m-4">
+        <div class="rounded-2xl shadow-lg overflow-hidden">
+            <div class="bg-blue-600 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">To Do App</h1>
+                        <p class="text-sm text-blue-100">Delete Task</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white px-6 pt-3 pb-6">
+                <form method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    <p class="text-gray-800">Are you sure you want to delete this task "<span class="font-semibold">{{ task }}</span>"?</p>
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        {% if not group %}
+                            <a href="{% url 'home' %}" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</a>
+                        {% else %}
+                            <a href="{% url 'group' group.id %}" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</a>
+                        {% endif %}
+                        <button type="submit" class="px-4 py-2 rounded-md bg-red-600 text-white font-medium hover:bg-red-700">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

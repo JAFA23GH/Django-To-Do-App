@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html class="h-full bg-gray-100">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% if form.instance.pk %}Edit Task{% else %}Create Task{% endif %}</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
+    <style>
+        .badge-high { background-color: #F97316; color: #fff; border-color: #EA580C; }
+        .badge-high-light { background-color: #FFEDD5; color: #9A3412; border-color: #FDBA74; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-2xl m-4">
+        <div class="rounded-2xl shadow-lg overflow-hidden">
+            <!-- Header -->
+            <div class="bg-blue-600 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">To Do App</h1>
+                        <p class="text-sm text-blue-100">{% if form.instance.pk %}Edit Task{% else %}Create Task{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white px-6 pt-3 pb-6">
+                <form method="POST" class="space-y-4">
+                    {% csrf_token %}
+
+                    <div>
+                        <label for="id_title" class="block text-sm font-medium text-gray-700">Title</label>
+                        <input type="text" name="title" id="id_title" value="{{ form.title.value|default_if_none:'' }}"
+                                     class="mt-1 block w-full rounded-md bg-gray-100 border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-600" required />
+                        {% if form.title.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="id_description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea name="description" id="id_description" rows="4"
+                                            class="mt-1 block w-full rounded-md bg-gray-100 border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-600">{{ form.description.value|default_if_none:'' }}</textarea>
+                        {% if form.description.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-end justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="block text-sm font-medium text-gray-700">Priority</span>
+                            <input type="hidden" name="priority" id="id_priority" value="{{ form.priority.value|default:3 }}" />
+                            <div id="priority-buttons" class="mt-1 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <button type="button" data-value="1" data-default="border-red-300 text-red-700 bg-red-50" data-selected="bg-red-600 text-white border-red-600 ring-2 ring-red-300" class="px-3 py-1 rounded-md border text-sm font-medium transition">Urgent</button>
+                                <button type="button" data-value="2" data-default="badge-high-light" data-selected="badge-high ring-2 ring-orange-300" class="px-3 py-1 rounded-md border text-sm font-medium transition">High</button>
+                                <button type="button" data-value="3" data-default="border-yellow-300 text-yellow-800 bg-yellow-50" data-selected="bg-yellow-400 text-white border-yellow-600 ring-2 ring-yellow-300" class="px-3 py-1 rounded-md border text-sm font-medium transition">Neutral</button>
+                                <button type="button" data-value="4" data-default="border-green-300 text-green-700 bg-green-50" data-selected="bg-green-600 text-white border-green-600 ring-2 ring-green-300" class="px-3 py-1 rounded-md border text-sm font-medium transition">Low</button>
+                            </div>
+                            {% if form.priority.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.priority.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex items-center">
+                            <input type="checkbox" name="complete" id="id_complete" {% if form.complete.value %}checked{% endif %}
+                                   class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                            <label for="id_complete" class="ml-2 block text-sm text-gray-700">Completed</label>
+                        </div>
+                    </div>
+
+                    {% if form.instance.pk and form.instance.created_at %}
+                        <p class="text-xs text-gray-500">Created at: {{ form.instance.created_at }}</p>
+                    {% endif %}
+
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <a href="{% if group %}{% url 'group' group.id %}{% else %}{% url 'home' %}{% endif %}" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</a>
+                        <button type="submit" class="px-4 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+            <script>
+                (function() {
+                    const input = document.getElementById('id_priority');
+                    const container = document.getElementById('priority-buttons');
+                    if (!input || !container) return;
+                    const base = 'px-3 py-1 rounded-md border text-sm font-medium transition';
+                    const buttons = Array.prototype.slice.call(container.querySelectorAll('[data-value]'));
+                    function applyState() {
+                        buttons.forEach(btn => {
+                            const selected = String(btn.getAttribute('data-value')) === String(input.value || '3');
+                            const def = btn.getAttribute('data-default') || '';
+                            const sel = btn.getAttribute('data-selected') || '';
+                            btn.className = base + ' ' + (selected ? sel : def);
+                            btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
+                        });
+                    }
+                    buttons.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            input.value = btn.getAttribute('data-value');
+                            applyState();
+                        });
+                    });
+                    applyState();
+                })();
+            </script>
+            </html>

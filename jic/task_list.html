@@ -1,0 +1,37 @@
+<div>
+    <h3>To Do App</h3>
+    <h4>{{request.user}}</h4> 
+    <a href="{% url "logout" %}">Logout</a>
+</div>
+
+<div>
+    <form method="GET">
+        <input type="text" name="search-area" value="{{search_input}}">
+        <input class="button" type="submit" value="Search" >
+    </form>    
+    <a href="{% url "creation" %}">Create Task</a>
+    <a href="{% url "group-create" %}">Create Group</a>
+</div>
+
+<div>
+    {% for group in groups %}
+        <div>
+           <a href="{% url "group" group.id %}">{{group}}</a>                     
+           <a href="{% url "group-delete" group.id %}">Delete</a> 
+        </div>
+    {% endfor %}
+</div>
+
+<div>
+    {% for task in tasks %}
+        {% if not task.group %}
+        <div>
+            <a href="{% url "task-edit" task.id %}">{{task}}</a>                     
+            <a href="{% url "task-delete" task.id %}">Delete</a> 
+            {% if groups %}
+            <a href="{% url "add-task-group" task.id %}">Add to group</a>
+            {% endif %}  
+        </div>
+        {% endif %}        
+    {% endfor %}
+</div>

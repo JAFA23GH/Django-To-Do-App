@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html class="h-full bg-gray-100">
+<head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{{ group.name }} — Tasks</title>
+        <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+        <style>
+            .badge-high { background-color: #F97316; color: #fff; }
+        </style>
+        {% csrf_token %}
+    
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-3xl m-4">
+        <div class="rounded-2xl shadow-lg overflow-hidden">
+            <!-- Header -->
+            <div class="bg-blue-600 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">To Do App</h1>
+                        <p class="text-sm text-blue-100">Group: {{ group.name }}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="{% url 'home' %}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-300" title="Go back" aria-label="Go back">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor" aria-hidden="true">
+                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59z" />
+                            </svg>
+                        </a>
+                        <a href="{% url 'group-edit' group.id %}" class="inline-block px-3 py-1 rounded-md bg-white text-blue-600 font-medium hover:bg-blue-50" title="Edit group" aria-label="Edit group">Edit group</a>
+                        <a href="{% url 'group-delete' group.id %}" class="inline-block px-3 py-1 rounded-md bg-red-600 text-white font-medium hover:bg-red-700" title="Delete group" aria-label="Delete group">Delete group</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6">
+
+                        <!-- Search -->
+                <div class="mb-4">
+                    <form method="GET" class="flex gap-3 items-center">
+                        <input type="text" name="search-area" value="{{ search_input }}" placeholder="Search in this group..."
+                                     class="flex-1 rounded-md bg-gray-100 border border-gray-300 px-3 py-2 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-600" />
+                        <button type="submit" class="px-4 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-500">Search</button>
+                    </form>
+                </div>
+
+                <!-- Tasks in group -->
+                <section>
+                                <div class="flex items-center justify-between mb-2">
+                                    <h2 class="text-lg font-bold text-gray-600">Tasks</h2>
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{% url 'group-task-creation' group.id %}" class="inline-flex items-center justify-center p-1 rounded-md text-blue-600 hover:bg-blue-50" title="Create Task" aria-label="Create Task">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+                                </svg>
+                                <span class="sr-only">Create Task</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 max-h-96 overflow-auto pr-2">
+                        {% for task in group_tasks %}
+                            <div class="w-full border rounded-lg p-4 flex items-center justify-between shadow-sm {% if task.complete or task.priority == 5 %}bg-green-50 border-green-200{% else %}bg-gray-50 border-gray-200{% endif %}">
+                                <div class="flex items-center space-x-3">
+                                    <div>
+                                        {% if task.priority == 1 %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-600 text-white border border-red-200">Urgent</span>
+                                        {% elif task.priority == 2 %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium badge-high">High</span>
+                                        {% elif task.priority == 3 %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">Neutral</span>
+                                        {% elif task.priority == 4 %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">Low</span>
+                                        {% else %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">Completed</span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'group-task-edit' group.id task.id %}" class="text-gray-900 font-medium hover:underline">{{ task }}</a>
+                                        {% if task.due_date %}
+                                            <div class="text-xs text-gray-500">Due: {{ task.due_date }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center space-x-2">
+                                    <form method="POST" action="" class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="task_id" value="{{ task.pk }}">
+                                                            <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-300 text-gray-900 hover:bg-gray-400 border border-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300" title="Remove from group" aria-label="Remove from group">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                                    <path d="M6 6l12 12M6 18L18 6" />
+                                                                </svg>
+                                                            </button>
+                                    </form>
+                                    <a href="{% url 'group-task-delete' group.id task.id %}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300" title="Delete task" aria-label="Delete task">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" aria-hidden="true" fill="currentColor">
+                                            <path d="M9 3a1 1 0 00-.894.553L7.382 5H5a1 1 0 100 2h14a1 1 0 100-2h-2.382l-.724-1.447A1 1 0 0014 3H9zM7 9a1 1 0 011-1h8a1 1 0 011 1v9a2 2 0 01-2 2H9a2 2 0 01-2-2V9zm3 1a1 1 0 00-1 1v6a1 1 0 102 0v-6a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v6a1 1 0 102 0v-6a1 1 0 00-1-1z" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        {% if not group_tasks %}
+                            <div class="w-full border-2 border-dashed border-gray-200 rounded-lg p-8 text-center text-gray-500">
+                                No tasks in this group yet
+                            </div>
+                        {% endif %}
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
